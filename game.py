@@ -6,7 +6,7 @@ from random import random
 class Game:
 	WIDTH = 4
 	def __init__(self, app):
-		self.grid, self.app, self.playing = self.create_grid(), app, True
+		self.grid, self.app, self.playing, self.score = self.create_grid(), app, True, 0
 		self.locations, self.values, self.blocks = self.generate_locations(), self.generate_values(), self.generate_blocks()
 		self.create_next_block()
 		self.draw_grid()		

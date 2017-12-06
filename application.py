@@ -25,13 +25,19 @@ class Application(tk.Frame):
         self.suggestionButton = tk.Button(self, text='My Best Move',
                                           command=suggest_move)
         self.game_canvas = self.create_game_canvas()
+        self.score_canvas = tk.Canvas(self, height=Application.CANVAS_SIZE, width=128)
+        self.score_header_label = tk.Label(self.score_canvas, text='Score')
+        self.score_label = tk.Label(self.score_canvas, text='0')
         self.status = tk.Label(self, text="Playing...")
 
-        self.quitButton.grid()
-        self.resetButton.grid()
-        self.suggestionButton.grid()
-        self.game_canvas.grid()
-        self.status.grid()
+        self.quitButton.grid(row=0, column=0)
+        self.resetButton.grid(row=0, column=1)
+        self.suggestionButton.grid(row=1, columnspan=2)
+        self.game_canvas.grid(columnspan=2)
+        self.status.grid(columnspan=2)
+        self.score_canvas.grid(row=0, column=2, columnspan=2)
+        self.score_header_label.grid(in_=self.score_canvas)
+        self.score_label.grid(in_=self.score_canvas)
 
     def start_game(self):
         self.game, self.status['text'] = Game(self), "Playing..."
@@ -146,6 +152,7 @@ def get_new_col(col):
         if can_merge_vert(have_merged, block, new_col):
             new_col[-1] += block
             have_merged = True
+            app.game.score += 12 * block.value
         elif block:
             new_col.append(block)
     return new_col + [None for _ in range(Game.WIDTH - len(new_col))]
@@ -184,6 +191,7 @@ def update_grid_for_row(new_grid, row_num, blocks_in_row, delta, first_col):
                            next_col, row_num, delta, i):
             new_grid[next_col - delta][row_num] += block
             have_merged = True
+            app.game.score += 12 * block.value
         else:
             new_grid[next_col][row_num] = block
             next_col += delta
@@ -202,6 +210,7 @@ def is_in_bounds_after_movement(delta, col_num, i):
 def put_block_in_grid():
     app.game.create_next_block()
     app.game.draw_grid()
+    app.score_label['text'] = app.game.score
 
 
 if __name__ == '__main__':
