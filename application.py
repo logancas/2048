@@ -20,30 +20,30 @@ class Application(tk.Frame):
 
     def createWidgets(self):
         self.quitButton = tk.Button(self, text='Quit', command=self.quit)
-        self.quitButton.grid()
         self.resetButton = tk.Button(self, text='Reset',
                                      command=self.start_game)
-        self.resetButton.grid()
         self.suggestionButton = tk.Button(self, text='My Best Move',
                                           command=suggest_move)
-        self.suggestionButton.grid()
         self.game_canvas = self.create_game_canvas()
-        self.game_canvas.grid()
         self.status = tk.Label(self, text="Playing...")
+
+        self.quitButton.grid()
+        self.resetButton.grid()
+        self.suggestionButton.grid()
+        self.game_canvas.grid()
         self.status.grid()
 
     def start_game(self):
-        self.game = Game(self)
-        self.status['text'] = "Playing..."
+        self.game, self.status['text'] = Game(self), "Playing..."
         self.status.grid()
 
     def create_game_canvas(self):
-        canvas = tk.Canvas(self, height=Application.CANVAS_SIZE,
-                           width=Application.CANVAS_SIZE)
         x_range = range(Application.BORDER_SIZE, Application.CANVAS_SIZE + 1)
         y_range = range(Application.BORDER_SIZE, Application.CANVAS_SIZE + 1)
         step = int((Application.CANVAS_SIZE - Application.BORDER_SIZE) /
                    Game.WIDTH)
+        canvas = tk.Canvas(self, height=Application.CANVAS_SIZE,
+                           width=Application.CANVAS_SIZE)
         for x in x_range[::step]:
             for y in y_range[::step]:
                 canvas.create_rectangle(Application.BORDER_SIZE,
@@ -59,10 +59,8 @@ class Application(tk.Frame):
 
 
 def suggest_move():
-    move = get_max_empty_move([(count_empty(shift_blocks_up()), 'up'),
-                               (count_empty(shift_blocks_down()), 'down'),
-                               (count_empty(shift_blocks_left()), 'left'),
-                               (count_empty(shift_blocks_right()), 'right')])
+    move = get_max_empty_move([(get_max_empty('up'), 'up'), (get_max_empty('down'), 'down'), (get_max_empty('left'), 'left'), (get_max_empty('right'), 'right')])
+                
     if len(move) > 2:
         move_options = ', '.join(move[:-2]) + ', ' + ', or '.join(move[-2:])
         tkmb.showinfo('Hint', 'Your best moves are ' + move_options)
@@ -72,6 +70,27 @@ def suggest_move():
     else:
         tkmb.showinfo('Hint', 'Your best move is ' + move[0])
 
+def get_max_empty(dir):
+    if dir == 'up':
+        return max(count_empty(shift_blocks_up(shift_blocks_up(app.game.grid))),
+            count_empty(shift_blocks_down(shift_blocks_up(app.game.grid))),
+            count_empty(shift_blocks_right(shift_blocks_up(app.game.grid))),
+            count_empty(shift_blocks_left(shift_blocks_up(app.game.grid))))
+    elif dir == 'down':
+        return max(count_empty(shift_blocks_up(shift_blocks_down(app.game.grid))),
+            count_empty(shift_blocks_down(shift_blocks_down(app.game.grid))),
+            count_empty(shift_blocks_right(shift_blocks_down(app.game.grid))),
+            count_empty(shift_blocks_left(shift_blocks_down(app.game.grid))))
+    elif dir == 'right':
+        return max(count_empty(shift_blocks_up(shift_blocks_right(app.game.grid))),
+            count_empty(shift_blocks_down(shift_blocks_right(app.game.grid))),
+            count_empty(shift_blocks_right(shift_blocks_right(app.game.grid))),
+            count_empty(shift_blocks_left(shift_blocks_right(app.game.grid))))
+    elif dir == 'left':
+        return max(count_empty(shift_blocks_up(shift_blocks_left(app.game.grid))),
+            count_empty(shift_blocks_down(shift_blocks_left(app.game.grid))),
+            count_empty(shift_blocks_right(shift_blocks_left(app.game.grid))),
+            count_empty(shift_blocks_left(shift_blocks_left(app.game.grid))))
 
 def count_empty(grid):
     count = 0
@@ -94,31 +113,31 @@ def get_max_empty_move(nums_to_moves):
 
 
 def move_blocks_up(event):
-    app.game.grid = shift_blocks_up()
+    app.game.grid = shift_blocks_up(app.game.grid)
     put_block_in_grid()
 
 
 def move_blocks_down(event):
-    app.game.grid = shift_blocks_down()
+    app.game.grid = shift_blocks_down(app.game.grid)
     put_block_in_grid()
 
 
 def move_blocks_right(event):
-    app.game.grid = shift_blocks_right()
+    app.game.grid = shift_blocks_right(app.game.grid)
     put_block_in_grid()
 
 
 def move_blocks_left(event):
-    app.game.grid = shift_blocks_left()
+    app.game.grid = shift_blocks_left(app.game.grid)
     put_block_in_grid()
 
 
-def shift_blocks_down():
-    return [get_new_col(col[::-1])[::-1] for col in app.game.grid]
+def shift_blocks_down(grid):
+    return [get_new_col(col[::-1])[::-1] for col in grid]
 
 
-def shift_blocks_up():
-    return [get_new_col(col) for col in app.game.grid]
+def shift_blocks_up(grid):
+    return [get_new_col(col) for col in grid]
 
 
 def get_new_col(col):
@@ -137,25 +156,24 @@ def can_merge_vert(have_merged, block, col):
            and col[-1].value == block.value
 
 
-def shift_blocks_right():
-    return shift_horiz(-1, -1, Game.WIDTH - 1)
+def shift_blocks_right(grid):
+    return shift_horiz(grid, -1, -1, Game.WIDTH - 1)
 
 
-def shift_blocks_left():
-    return shift_horiz(1, 1, 0)
+def shift_blocks_left(grid):
+    return shift_horiz(grid, 1, 1, 0)
 
 
-def shift_horiz(step, delta, first_col):
+def shift_horiz(grid, step, delta, first_col):
     new_grid = [[None for _ in range(Game.WIDTH)] for _ in range(Game.WIDTH)]
     for i in range(Game.WIDTH):
         new_grid = update_grid_for_row(new_grid, i,
-                                       get_blocks_in_row(i)[::step],
+                                       get_blocks_in_row(grid, i)[::step],
                                        delta, first_col)
     return new_grid
 
 
-def get_blocks_in_row(row_num):
-    grid = app.game.grid
+def get_blocks_in_row(grid, row_num):
     return [grid[i][row_num] for i in range(4) if grid[i][row_num]]
 
 
