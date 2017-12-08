@@ -5,6 +5,8 @@ from random import random
 
 class Game:
 	WIDTH = 4
+	HIGH_SCORE_FILE = 'high_scores.txt'
+
 	def __init__(self, app):
 		self.grid, self.app, self.playing, self.score = self.create_grid(), app, True, 0
 		self.locations, self.values, self.blocks = self.generate_locations(), self.generate_values(), self.generate_blocks()
@@ -85,6 +87,14 @@ class Game:
 		self.app.game_canvas.create_text(i_middle, j_middle, text=block.value, 
 									fill=block.text_color)
 
+	def read_high_scores(self):
+		try:
+			with open(Game.HIGH_SCORE_FILE) as f:
+				self.high_scores = f.read()
+			return self.high_scores
+		except OSError:
+			return ''
+
 def get_border_dims(indx):
 	return indx * Block.SIZE + Application.BORDER_SIZE, (indx + 1) * Block.SIZE  + Application.BORDER_SIZE
 	
@@ -93,6 +103,7 @@ def get_color(block):
 		return block.color
 	else:
 		return 'white'
+
 
 
 

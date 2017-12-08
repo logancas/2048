@@ -4,7 +4,6 @@
 import tkinter as tk
 import tkinter.messagebox as tkmb
 from random import random
-import math
 from game import *
 
 
@@ -28,19 +27,26 @@ class Application(tk.Frame):
         self.score_canvas = tk.Canvas(self, height=Application.CANVAS_SIZE, width=128)
         self.score_header_label = tk.Label(self.score_canvas, text='Score')
         self.score_label = tk.Label(self.score_canvas, text='0')
+        self.high_scores_label = tk.Label(self.score_canvas, text='')
+        self.high_scores_header_label = tk.Label(self.score_canvas, text='High Scores')
+        self.high_scores_score_header_label = tk.Label(self.score_canvas, text='Score, Date')
         self.status = tk.Label(self, text="Playing...")
 
         self.quitButton.grid(row=0, column=0)
         self.resetButton.grid(row=0, column=1)
         self.suggestionButton.grid(row=1, columnspan=2)
-        self.game_canvas.grid(columnspan=2)
+        self.game_canvas.grid(row=2, columnspan=2)
         self.status.grid(columnspan=2)
-        self.score_canvas.grid(row=0, column=2, columnspan=2)
-        self.score_header_label.grid(in_=self.score_canvas)
-        self.score_label.grid(in_=self.score_canvas)
+        self.score_canvas.grid(row=2, column=2, columnspan=2)
+        self.score_header_label.grid(in_=self.score_canvas, row=3, column=2, columnspan=2)
+        self.score_label.grid(in_=self.score_canvas, row=4, column=2, columnspan=2)
+        self.high_scores_header_label.grid(in_=self.score_canvas, row=6, column=2, columnspan=2)
+        self.high_scores_score_header_label.grid(in_=self.score_canvas, row=7, column=2)
+        self.high_scores_label.grid(in_=self.score_canvas, row=8, column=2,columnspan=2)
 
     def start_game(self):
         self.game, self.status['text'] = Game(self), "Playing..."
+        self.high_scores_label['text'] = self.game.read_high_scores()
         self.status.grid()
 
     def create_game_canvas(self):
@@ -62,6 +68,7 @@ class Application(tk.Frame):
     def lose_game(self):
         self.status['text'] = "You've lost! Hit reset to play again."
         self.status.grid()
+        self.game.write_score(self.)
 
 
 def suggest_move():
@@ -221,3 +228,4 @@ if __name__ == '__main__':
     app.bind_all('<Key-Left>', move_blocks_left)
     app.bind_all('<Key-Right>', move_blocks_right)
     app.mainloop()
+
