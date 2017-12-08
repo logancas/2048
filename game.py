@@ -2,6 +2,7 @@ from application import *
 from block import *
 import tkinter as tk
 from random import random
+import datetime
 
 class Game:
 	WIDTH = 4
@@ -90,10 +91,19 @@ class Game:
 	def read_high_scores(self):
 		try:
 			with open(Game.HIGH_SCORE_FILE) as f:
-				self.high_scores = f.read()
-			return self.high_scores
+				self.high_scores = f.read().split(',')
+			return self.high_scores[0], self.high_scores[1]
 		except OSError:
 			return ''
+
+	def write_high_score(self):
+		date = str(datetime.date.today()).split('-')
+		try:
+			with open(Game.HIGH_SCORE_FILE, 'w') as f:
+				f.write(str(self.score) + ',' + '/'.join(date[1:] + [date[0]]))
+		except OSError as e:
+			print('except:' + str(e))
+			return
 
 def get_border_dims(indx):
 	return indx * Block.SIZE + Application.BORDER_SIZE, (indx + 1) * Block.SIZE  + Application.BORDER_SIZE

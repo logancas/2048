@@ -20,16 +20,17 @@ class Application(tk.Frame):
     def createWidgets(self):
         self.quitButton = tk.Button(self, text='Quit', command=self.quit)
         self.resetButton = tk.Button(self, text='Reset',
-                                     command=self.start_game)
+                                     command=self.reset)
         self.suggestionButton = tk.Button(self, text='My Best Move',
                                           command=suggest_move)
         self.game_canvas = self.create_game_canvas()
         self.score_canvas = tk.Canvas(self, height=Application.CANVAS_SIZE, width=128)
-        self.score_header_label = tk.Label(self.score_canvas, text='Score')
+        self.score_header_label = tk.Label(self.score_canvas, text='Score: ')
         self.score_label = tk.Label(self.score_canvas, text='0')
+        self.high_scores_header_label = tk.Label(self.score_canvas, text='Last Score: ')
         self.high_scores_label = tk.Label(self.score_canvas, text='')
-        self.high_scores_header_label = tk.Label(self.score_canvas, text='High Scores')
-        self.high_scores_score_header_label = tk.Label(self.score_canvas, text='Score, Date')
+        self.date_header_label= tk.Label(self.score_canvas, text='Date:')
+        self.date_label = tk.Label(self.score_canvas, text='')
         self.status = tk.Label(self, text="Playing...")
 
         self.quitButton.grid(row=0, column=0)
@@ -37,17 +38,24 @@ class Application(tk.Frame):
         self.suggestionButton.grid(row=1, columnspan=2)
         self.game_canvas.grid(row=2, columnspan=2)
         self.status.grid(columnspan=2)
+
         self.score_canvas.grid(row=2, column=2, columnspan=2)
-        self.score_header_label.grid(in_=self.score_canvas, row=3, column=2, columnspan=2)
-        self.score_label.grid(in_=self.score_canvas, row=4, column=2, columnspan=2)
-        self.high_scores_header_label.grid(in_=self.score_canvas, row=6, column=2, columnspan=2)
-        self.high_scores_score_header_label.grid(in_=self.score_canvas, row=7, column=2)
-        self.high_scores_label.grid(in_=self.score_canvas, row=8, column=2,columnspan=2)
+        self.score_header_label.grid(in_=self.score_canvas, row=3, column=2)
+        self.score_label.grid(in_=self.score_canvas, row=3, column=3)
+        self.high_scores_header_label.grid(in_=self.score_canvas, row=6, column=2)
+        self.high_scores_label.grid(in_=self.score_canvas, row=6, column=3)
+        self.date_header_label.grid(in_=self.score_canvas, row=7, column=2)
+        self.date_label.grid(in_=self.score_canvas, row=7, column=3)
 
     def start_game(self):
         self.game, self.status['text'] = Game(self), "Playing..."
-        self.high_scores_label['text'] = self.game.read_high_scores()
+        self.high_scores_label['text'], self.date_label['text'] = self.game.read_high_scores()
         self.status.grid()
+
+    def reset(self):
+        self.score_label['text'] = '0'
+        self.game.write_high_score()
+        self.start_game()
 
     def create_game_canvas(self):
         x_range = range(Application.BORDER_SIZE, Application.CANVAS_SIZE + 1)
@@ -68,7 +76,7 @@ class Application(tk.Frame):
     def lose_game(self):
         self.status['text'] = "You've lost! Hit reset to play again."
         self.status.grid()
-        self.game.write_score(self.)
+        self.game.write_high_score()
 
 
 def suggest_move():
