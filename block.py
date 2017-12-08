@@ -1,8 +1,4 @@
-#Referenced this site for information on how to use colors in matlab
-#https://matplotlib.org/examples/color/named_colors.html
-
 from application import *
-from matplotlib import colors as mcolors
 
 class Block:
 	colors = {2: 'blue', 4: '#00ffff', 8: 'black', 16: 'green', 32: 'yellow', 64: 'brown', 128: 'orange', 256: 'red', 512: 'purple', 1024: 'white', 2048: 'grey'}
@@ -11,11 +7,10 @@ class Block:
 
 	def __init__(self, value):
 		self.value = value
+		while value > 2048:
+			value = value / 2048
 		self.color = Block.colors[value]
 		self.text_color = Block.text_colors[value]
-
+			
 	def __add__(self, other):
 		return Block(self.value + other.value)
-
-
-

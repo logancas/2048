@@ -1,12 +1,12 @@
 from application import *
 from block import *
-import tkinter as tk
 from random import random
 import datetime
+import tkinter as tk
 
 class Game:
 	WIDTH = 4
-	HIGH_SCORE_FILE = 'high_scores.txt'
+	LAST_SCORE_FILE = 'last_score.txt'
 
 	def __init__(self, app):
 		self.grid, self.app, self.playing, self.score = self.create_grid(), app, True, 0
@@ -28,27 +28,26 @@ class Game:
 			self.locations = self.generate_locations()
 		finally:
 			if not self.has_move():
-				print('lost game')
 				self.app.lose_game()
 
 	def has_move(self):
 		for i, col in enumerate(self.grid):
 			for j, block in enumerate(col):
-				if not block or self.can_merge_up(i, j) or self.can_merge_down(i, j) or self.can_merge_left(i, j) or self.can_merge_right(i, j):
+				if not block or (self.grid[i][j] and (self.can_merge_up(i, j) or self.can_merge_down(i, j) or self.can_merge_left(i, j) or self.can_merge_right(i, j))):
 					return True
 		return False
 
 	def can_merge_up(self, col_num, row_num):
-		return row_num > 0 and self.grid[col_num][row_num] and self.grid[col_num][row_num-1] and self.grid[col_num][row_num-1].value == self.grid[col_num][row_num].value
+		return row_num > 0 and self.grid[col_num][row_num-1] and self.grid[col_num][row_num-1].value == self.grid[col_num][row_num].value
 
 	def can_merge_down(self, col_num, row_num):
-		return row_num < Game.WIDTH-1 and self.grid[col_num][row_num] and self.grid[col_num][row_num+1] and self.grid[col_num][row_num+1].value == self.grid[col_num][row_num].value
+		return row_num < Game.WIDTH-1 and self.grid[col_num][row_num+1] and self.grid[col_num][row_num+1].value == self.grid[col_num][row_num].value
 
 	def can_merge_left(self, col_num, row_num):
-		return col_num > 0 and self.grid[col_num][row_num] and self.grid[col_num-1][row_num] and self.grid[col_num-1][row_num].value == self.grid[col_num][row_num].value
+		return col_num > 0 and self.grid[col_num-1][row_num] and self.grid[col_num-1][row_num].value == self.grid[col_num][row_num].value
 
 	def can_merge_right(self, col_num, row_num):
-		return col_num < Game.WIDTH-1 and self.grid[col_num][row_num] and self.grid[col_num+1][row_num] and self.grid[col_num+1][row_num].value == self.grid[col_num][row_num].value
+		return col_num < Game.WIDTH-1 and self.grid[col_num+1][row_num] and self.grid[col_num+1][row_num].value == self.grid[col_num][row_num].value
 
 	def generate_blocks(self):
 		while self.playing:
@@ -90,7 +89,7 @@ class Game:
 
 	def read_high_scores(self):
 		try:
-			with open(Game.HIGH_SCORE_FILE) as f:
+			with open(Game.LAST_SCORE_FILE) as f:
 				self.high_scores = f.read().split(',')
 			return self.high_scores[0], self.high_scores[1]
 		except OSError:
@@ -99,10 +98,9 @@ class Game:
 	def write_high_score(self):
 		date = str(datetime.date.today()).split('-')
 		try:
-			with open(Game.HIGH_SCORE_FILE, 'w') as f:
+			with open(Game.LAST_SCORE_FILE, 'w') as f:
 				f.write(str(self.score) + ',' + '/'.join(date[1:] + [date[0]]))
 		except OSError as e:
-			print('except:' + str(e))
 			return
 
 def get_border_dims(indx):
@@ -113,11 +111,3 @@ def get_color(block):
 		return block.color
 	else:
 		return 'white'
-
-
-
-
-	
-
-
-
