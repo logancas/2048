@@ -80,16 +80,19 @@ class Application(tk.Frame):
 
 
 def suggest_move():
-    move = get_max_empty_move([(get_max_empty('up'), 'up'), (get_max_empty('down'), 'down'), (get_max_empty('left'), 'left'), (get_max_empty('right'), 'right')])
+    move = get_best_move([(get_max_empty('up'), 'up'),
+                          (get_max_empty('down'), 'down'),
+                          (get_max_empty('left'), 'left'), 
+                          (get_max_empty('right'), 'right')])
                 
     if len(move) > 2:
         move_options = ', '.join(move[:-2]) + ', ' + ', or '.join(move[-2:])
         tkmb.showinfo('Hint', 'Your best moves are ' + move_options)
     elif len(move) == 2:
-        move_options = move[0] + ' or ' + move[1]
-        tkmb.showinfo('Hint', 'Your best moves are ' + move_options)
+        tkmb.showinfo('Hint', 'Your best moves are ' + move[0] + ' or ' + move[1])
     else:
         tkmb.showinfo('Hint', 'Your best move is ' + move[0])
+
 
 def get_max_empty(dir):
     if dir == 'up':
@@ -113,6 +116,7 @@ def get_max_empty(dir):
             count_empty(shift_blocks_right(shift_blocks_left(app.game.grid))),
             count_empty(shift_blocks_left(shift_blocks_left(app.game.grid))))
 
+
 def count_empty(grid):
     count = 0
     for col in grid:
@@ -121,7 +125,7 @@ def count_empty(grid):
     return count
 
 
-def get_max_empty_move(nums_to_moves):
+def get_best_move(nums_to_moves):
     most_empty = 0
     move_with_most_empty = ['up']
     for num_empty, move in nums_to_moves:
@@ -134,34 +138,36 @@ def get_max_empty_move(nums_to_moves):
 
 
 def move_blocks_up(event):
-    app.game.grid = shift_blocks_up(app.game.grid)
-    put_block_in_grid()
+    update_grid(shift_blocks_up(app.game.grid))
 
 
 def move_blocks_down(event):
-    app.game.grid = shift_blocks_down(app.game.grid)
-    put_block_in_grid()
+    update_grid(shift_blocks_down(app.game.grid))
 
 
 def move_blocks_right(event):
-    app.game.grid = shift_blocks_right(app.game.grid)
-    put_block_in_grid()
+    update_grid(shift_blocks_right(app.game.grid))
 
 
 def move_blocks_left(event):
-    app.game.grid = shift_blocks_left(app.game.grid)
-    put_block_in_grid()
+    update_grid(shift_blocks_left(app.game.grid))
+
+
+def update_grid(new_grid):
+    if not new_grid == app.game.grid:
+        app.game.grid = new_grid
+        put_block_in_grid()
 
 
 def shift_blocks_down(grid):
-    return [get_new_col(col[::-1])[::-1] for col in grid]
+    return [get_shifted_col(col[::-1])[::-1] for col in grid]
 
 
 def shift_blocks_up(grid):
-    return [get_new_col(col) for col in grid]
+    return [get_shifted_col(col) for col in grid]
 
 
-def get_new_col(col):
+def get_shifted_col(col):
     new_col, have_merged = list(), False
     for block in col:
         if can_merge_vert(have_merged, block, new_col):
