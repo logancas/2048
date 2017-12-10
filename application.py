@@ -5,6 +5,8 @@ import tkinter as tk
 import tkinter.messagebox as tkmb
 from random import random
 from game import *
+import numpy as np
+import time
 
 
 class Application(tk.Frame):
@@ -154,11 +156,34 @@ def get_best_move(nums_to_moves):
 
 
 def move_blocks_up(event):
-    update_grid(shift_blocks_up(app.game.grid))
+    update_grid(merge_vert(shift_blocks_up(), 1))
+
+
+def shift_blocks_up():
+    new_grid =  np.empty((Game.WIDTH, Game.WIDTH), dtype=int)
+    for i, col in enumerate([col[col!=0] for col in app.game.grid]):
+        while len(col) < 4:
+            col = np.append(col, 0)
+        new_grid[i] = col
+    return new_grid
+
+def merge_vert(new_grid, delta):
+    for i, col in enumerate(new_grid):
+        col_to_iterate_over = col[::delta]
+        prev_block = col_to_iterate_over[0]
+        for j, block in enumerate(col_to_iterate_over):
+            if block == prev_block:
+                
+    return new_grid
 
 
 def move_blocks_down(event):
-    update_grid(shift_blocks_down(app.game.grid))
+    new_grid =  np.empty((Game.WIDTH, Game.WIDTH), dtype=int)
+    for i, col in enumerate([col[col!=0] for col in app.game.grid]):
+        while len(col) < 4:
+            col = np.insert(col, 0, 0)
+        new_grid[i] = col
+    update_grid(new_grid)
 
 
 def move_blocks_right(event):
@@ -170,35 +195,35 @@ def move_blocks_left(event):
 
 
 def update_grid(new_grid):
-    if not new_grid == app.game.grid:
+    if not np.array_equal(new_grid, app.game.grid):
         app.previous_grid = app.game.grid
         app.game.grid = new_grid
         put_block_in_grid()
 
 
-def shift_blocks_down(grid):
-    return [get_shifted_col(col[::-1])[::-1] for col in grid]
+# def shift_blocks_down(grid):
+#     return np.array([get_shifted_col(col[::-1])[::-1] for col in grid])
 
 
-def shift_blocks_up(grid):
-    return [get_shifted_col(col) for col in grid]
+# def shift_blocks_up(grid):
+#     return np.array([get_shifted_col(col) for col in grid])
 
 
-def get_shifted_col(col):
-    new_col, have_merged = list(), False
-    for block in col:
-        if can_merge_vert(have_merged, block, new_col):
-            new_col[-1] += block
-            have_merged = True
-            app.game.score += 12 * block.value
-        elif block:
-            new_col.append(block)
-    return new_col + [None for _ in range(Game.WIDTH - len(new_col))]
+# def get_shifted_col(col):
+#     new_col, have_merged = list(), False
+#     for block in col:
+#         if can_merge_vert(have_merged, block, new_col):
+#             new_col[-1] += block
+#             have_merged = True
+#             app.game.score += 12 * block
+#         elif block:
+#             new_col.append(block)
+#     return new_col + [0 for _ in range(Game.WIDTH - len(new_col))]
 
 
 def can_merge_vert(have_merged, block, col):
     return block and not have_merged and len(col) > 0 \
-           and col[-1].value == block.value
+           and col[-1] == block
 
 
 def shift_blocks_right(grid):
@@ -210,7 +235,7 @@ def shift_blocks_left(grid):
 
 
 def shift_horiz(grid, step, delta, first_col):
-    new_grid = [[None for _ in range(Game.WIDTH)] for _ in range(Game.WIDTH)]
+    new_grid = np.full((Game.WIDTH,Game.WIDTH), 0)
     for i in range(Game.WIDTH):
         new_grid = update_grid_for_row(new_grid, i,
                                        get_blocks_in_row(grid, i)[::step],
@@ -229,7 +254,7 @@ def update_grid_for_row(new_grid, row_num, blocks_in_row, delta, first_col):
                            next_col, row_num, delta, i):
             new_grid[next_col - delta][row_num] += block
             have_merged = True
-            app.game.score += 12 * block.value
+            app.game.score += 12 * block
         else:
             new_grid[next_col][row_num] = block
             next_col += delta
@@ -238,7 +263,7 @@ def update_grid_for_row(new_grid, row_num, blocks_in_row, delta, first_col):
 
 def can_merge_horiz(have_merged, new_grid, block, col_num, row_num, delta, i):
     return not have_merged and is_in_bounds_after_movement(delta, col_num, i) \
-        and new_grid[col_num - delta][row_num].value == block.value
+        and new_grid[col_num - delta][row_num] == block
 
 
 def is_in_bounds_after_movement(delta, col_num, i):
