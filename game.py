@@ -11,7 +11,6 @@ class Game:
 	def __init__(self, app):
 		self.grid, self.app, self.playing, self.score = self.create_grid(), app, True, 0
 		self.locations, self.values, self.blocks = self.generate_locations(), self.generate_values(), self.generate_blocks()
-		self.mode = 'addition'
 		self.create_next_block()
 		self.draw_grid()		
 
@@ -22,6 +21,8 @@ class Game:
 		self.available_coords = self.get_available_coords()
 		try:
 			location = next(self.locations)
+			block = next(self.blocks)
+			print(block.value)
 			self.grid[location[0]][location[1]] = next(self.blocks)
 		except IndexError:
 			pass
@@ -52,7 +53,12 @@ class Game:
 
 	def generate_blocks(self):
 		while self.playing:
+<<<<<<< HEAD
+			print('mode: ' + self.mode)
 			yield Block(next(self.values), self.mode)
+=======
+			yield Block(next(self.values))
+>>>>>>> parent of 027bf8f... Implemented additional mode.
 
 	def generate_locations(self):
 		while self.playing:
@@ -63,10 +69,7 @@ class Game:
 
 	def generate_values(self):
 		while True:
-			if self.mode == 'addition':
-				yield 2 if random() < 0.85 else 4
-			else:
-				yield 65536 if random() < 0.95 else 256
+			yield 2 if random() < 0.85 else 4
 
 	def reset(self):
 		self.grid = list()
