@@ -19,13 +19,15 @@ class Application(tk.Frame):
         self.previous_grid = self.game.grid
 
     def createWidgets(self):
-        self.undoButton = tk.Button(self, text='Undo Last Move', command=self.undo)
-        self.quitButton = tk.Button(self, text='Quit', command=self.quit)
-        self.resetButton = tk.Button(self, text='Reset',
+        self.undo_button= tk.Button(self, text='Undo Last Move', command=self.undo)
+        self.quit_button= tk.Button(self, text='Quit', command=self.quit)
+        self.reset_button= tk.Button(self, text='Reset',
                                      command=self.reset)
-        self.suggestionButton = tk.Button(self, text='My Best Move',
+        self.suggestion_button= tk.Button(self, text='My Best Move',
                                           command=suggest_move)
-        self.instructionsButton = tk.Button(self, text='Instructions', command=get_instructions)
+        self.instructions_button= tk.Button(self, text='Instructions', command=get_instructions)
+        self.addition_mode_button = tk.Button(self, text='Addition Mode', command=self.addition_mode)
+        self.sqrt_mode_button = tk.Button(self, text='Square Root Mode', command=self.sqrt_mode)
 
         self.game_canvas = self.create_game_canvas()
         self.score_canvas = tk.Canvas(self, height=Application.CANVAS_SIZE, width=128)
@@ -37,13 +39,15 @@ class Application(tk.Frame):
         self.date_label = tk.Label(self.score_canvas, text='')
         self.status = tk.Label(self, text="Playing...")
 
-        self.quitButton.grid(row=1, column=2)
-        self.resetButton.grid(row=1, column=1)
-        self.suggestionButton.grid(row=0, column=1)
-        self.undoButton.grid(row=1, column=0)
-        self.instructionsButton.grid(row=0, column=0)
+        self.quit_button.grid(row=1, column=2)
+        self.reset_button.grid(row=1, column=1)
+        self.suggestion_button.grid(row=0, column=1)
+        self.undo_button.grid(row=1, column=0)
+        self.instructions_button.grid(row=0, column=0)
         self.game_canvas.grid(row=2, columnspan=3)
         self.status.grid(columnspan=5)
+        self.addition_mode_button.grid(row=0, column=3)
+        self.sqrt_mode_button.grid(row=0, column=4)
 
         self.score_canvas.grid(row=2, column=3, columnspan=2)
         self.score_header_label.grid(in_=self.score_canvas, row=3, column=3)
@@ -57,6 +61,14 @@ class Application(tk.Frame):
         app.game.grid = self.previous_grid
         app.game.draw_grid()
 
+    def addition_mode(self):
+        app.game.mode = 'addition'
+        self.reset()
+
+    def sqrt_mode(self):
+        app.game.mode = 'sqrt'
+        self.reset()
+
     def start_game(self):
         self.game, self.status['text'] = Game(self), "Playing..."
         self.high_scores_label['text'], self.date_label['text'] = self.game.read_high_scores()
@@ -66,6 +78,7 @@ class Application(tk.Frame):
         self.score_label['text'] = '0'
         self.game.write_high_score()
         self.start_game()
+        self.previous_grid = self.game.grid
 
     def create_game_canvas(self):
         x_range = range(Application.BORDER_SIZE, Application.CANVAS_SIZE + 1)
@@ -74,8 +87,6 @@ class Application(tk.Frame):
                    Game.WIDTH)
         canvas = tk.Canvas(self, height=Application.CANVAS_SIZE,
                            width=Application.CANVAS_SIZE)
-        # for x in x_range[::step]:
-        #     for y in y_range[::step]:
         for x,y in zip(x_range[::step], y_range[::step]):
                 canvas.create_rectangle(Application.BORDER_SIZE,
                                         Application.BORDER_SIZE, x, y)
@@ -91,7 +102,7 @@ class Application(tk.Frame):
 
 
 def get_instructions():
-    instructions = 'Use the arrow keys to shift and merge the blocks.  You goal is to reach the 2048 tile.  Once you get there, see how much farther you can go!\n\n Unsure which move to make next? The "My Best Move" button will suggest the move that can lead to the most empty spaces after two turns.\n\nIf you get stuck, press the "Undo" button to undo your last move.  This button will only work for your most recent move. (You cannot undo your two most recent moves, for example, just the most recent one.)'
+    instructions = 'Use the arrow keys to shift and merge the blocks.  You goal is to reach the 2048 tile.  Once you get there, see how much farther you can go!\n\n Unsure which move to make next? The "My Best Move" button will suggest the move that can lead to the most empty spaces after two turns.\n\nIf you get stuck, press the "Undo" button to undo your last move.  This button will only work for your most recent move. (You cannot undo your two most recent moves, for example, just the most recent one.) Resetting the game or switching game modes cannot be undone.'
     tkmb.showinfo('Instructions', instructions)
 
 
@@ -136,8 +147,7 @@ def get_max_empty(dir):
 def count_empty(grid):
     count = 0
     for col in grid:
-        for block in col:
-            count += int(not bool(block))
+        count += col.count(None)
     return count
 
 
