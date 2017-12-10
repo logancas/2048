@@ -13,6 +13,7 @@ class Application(tk.Frame):
 
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
+        self.mode = 'addition'
         self.pack()
         self.createWidgets()
         self.start_game()
@@ -25,13 +26,10 @@ class Application(tk.Frame):
                                      command=self.reset)
         self.suggestionButton = tk.Button(self, text='My Best Move',
                                           command=suggest_move)
-<<<<<<< HEAD
+
         self.instructions_button= tk.Button(self, text='Instructions', command=get_instructions)
         self.addition_mode_button = tk.Button(self, text='Addition Mode', command=addition_mode)
         self.sqrt_mode_button = tk.Button(self, text='Square Root Mode', command=sqrt_mode)
-=======
-        self.instructionsButton = tk.Button(self, text='Instructions', command=get_instructions)
->>>>>>> parent of 027bf8f... Implemented additional mode.
 
         self.game_canvas = self.create_game_canvas()
         self.score_canvas = tk.Canvas(self, height=Application.CANVAS_SIZE, width=128)
@@ -47,7 +45,7 @@ class Application(tk.Frame):
         self.resetButton.grid(row=1, column=1)
         self.suggestionButton.grid(row=0, column=1)
         self.undoButton.grid(row=1, column=0)
-        self.instructionsButton.grid(row=0, column=0)
+        self.instructions_button.grid(row=0, column=0)
         self.game_canvas.grid(row=2, columnspan=3)
         self.status.grid(columnspan=5)
 
@@ -58,18 +56,15 @@ class Application(tk.Frame):
         self.high_scores_label.grid(in_=self.score_canvas, row=6, column=4)
         self.date_header_label.grid(in_=self.score_canvas, row=7, column=3)
         self.date_label.grid(in_=self.score_canvas, row=7, column=4)
+        self.addition_mode_button.grid(row=0, column=3)
+        self.sqrt_mode_button.grid(row=1, column=4)
 
     def undo(self):
-<<<<<<< HEAD
         self.game.grid = self.previous_grid
         self.game.draw_grid()
-=======
-        app.game.grid = self.previous_grid
-        app.game.draw_grid()
->>>>>>> parent of 027bf8f... Implemented additional mode.
 
     def start_game(self):
-        self.game, self.status['text'] = Game(self), "Playing..."
+        self.game, self.status['text'] = Game(self, self.mode), "Playing..."
         self.high_scores_label['text'], self.date_label['text'] = self.game.read_high_scores()
         self.status.grid()
 
@@ -85,8 +80,6 @@ class Application(tk.Frame):
                    Game.WIDTH)
         canvas = tk.Canvas(self, height=Application.CANVAS_SIZE,
                            width=Application.CANVAS_SIZE)
-        # for x in x_range[::step]:
-        #     for y in y_range[::step]:
         for x,y in zip(x_range[::step], y_range[::step]):
                 canvas.create_rectangle(Application.BORDER_SIZE,
                                         Application.BORDER_SIZE, x, y)
@@ -153,12 +146,18 @@ def count_empty(grid):
 
 
 def addition_mode():
+    app.mode = 'addition'
     app.game.mode = 'addition'
     app.reset()
 
 def sqrt_mode():
+    app.mode = 'sqrt'
     app.game.mode = 'sqrt'
     app.reset()
+    app.mode = 'sqrt'
+    app.game.mode = 'sqrt'
+
+    
 
 
 def get_best_move(nums_to_moves):

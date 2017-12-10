@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-96,12/10/2017
-=======
-24,12/08/2017
->>>>>>> parent of 027bf8f... Implemented additional mode.
+0,12/10/2017
